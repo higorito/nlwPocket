@@ -15,6 +15,13 @@
       "when": 1725930051212,
       "tag": "0001_long_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1725980913304,
+      "tag": "0002_opposite_roxanne_simpson",
+      "breakpoints": true
     }
   ]
 }
