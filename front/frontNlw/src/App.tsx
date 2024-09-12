@@ -1,12 +1,19 @@
-import './App.css'
+import { Dialog, } from './components/ui/dialog'
+import { CreateGoal } from './components/create-goal'
+import { EmptyGoal } from './components/empty-goal'
+import { Summary } from './summary'
+
 
 function App() {
-
-
+  
   return (
-    <>
-      <h1>oi</h1>
-    </>
+    <Dialog>
+      
+      {/* <EmptyGoal/> */}
+      <Summary/>
+      
+      <CreateGoal />
+    </Dialog>
   )
 }
 
