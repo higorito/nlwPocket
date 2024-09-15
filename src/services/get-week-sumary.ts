@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { db } from "../db";
 import { goalCompletions, goals } from "../db/schema";
-import { count, lte, gte, and, eq, sql } from "drizzle-orm"; 
+import { count, lte, gte, and, eq, sql, desc } from "drizzle-orm"; 
 
 
 export async function getWeekSummary() {
@@ -32,6 +32,7 @@ export async function getWeekSummary() {
             gte(goalCompletions.createdAt, firstDayOfWeek),
             lte(goalCompletions.createdAt, lastDayOfWeek)
         ))
+        .orderBy(desc(goalCompletions.createdAt))
     )
 
     const goasCompletedByWeekDay = db.$with('goals_completed_by_week_day').as(
@@ -49,14 +50,17 @@ export async function getWeekSummary() {
         })
         .from(goalCompletedInWeek)
         .groupBy(goalCompletedInWeek.completedAtDate)
+        .orderBy(desc(goalCompletedInWeek.completedAtDate))
     )
+
+    type GoalsPerDay = Record<string, { id: number, title: string, completedAt: string }[]>
 
     const result = await db
         .with(goalsCreateUpToWeek, goalCompletedInWeek, goasCompletedByWeekDay)
         .select({
             completed: sql`(SELECT COUNT(*) FROM ${goalCompletedInWeek})`.mapWith(Number),
             total: sql`(SELECT SUM(${goalsCreateUpToWeek.desiredWeeklyFrequency}) FROM ${goalsCreateUpToWeek})`.mapWith(Number),
-            goalsPerDay: sql`
+            goalsPerDay: sql <GoalsPerDay>`
                     JSON_OBJECT_AGG(
                         ${goasCompletedByWeekDay.completedAtDate},
                         ${goasCompletedByWeekDay.completions}
@@ -66,6 +70,6 @@ export async function getWeekSummary() {
         .from(goasCompletedByWeekDay)
 
     return {
-        result
+        summary: result[0],
     }
 }
